@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(pangolin_catkin)
 
 find_package(catkin_simple REQUIRED)
-catkin_simple()
+catkin_simple(ALL_DEPS_REQUIRED)
 
 include(ExternalProject)
 
@@ -47,19 +47,50 @@ if (CMAKE_BUILD_TYPE)
 endif()
 
 file(MAKE_DIRECTORY ${CATKIN_DEVEL_PREFIX}/include)
-set(CATKIN_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
-
 ExternalProject_Add(pangolin_EXTERNAL
   GIT_REPOSITORY https://github.com/stevenlovegrove/Pangolin
   UPDATE_COMMAND ""
-  CMAKE_ARGS 
+  CMAKE_ARGS
+    -DCMAKE_INSTALL_PREFIX:PATH=${CATKIN_DEVEL_PREFIX}
     -DBUILD_SHARED_LIBS:BOOL=ON
     ${PANGOLIN_CMAKE_OPTIONS}
     -DBUILD_EXAMPLES:BOOL=OFF
     -DCPP11_NO_BOOST:BOOL=ON
-  BUILD_COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX:PATH=${CATKIN_DEVEL_PREFIX} . && make install -j 8
-  INSTALL_COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX:PATH=${CATKIN_INSTALL_PREFIX} . && make install -j 8
-)
+    BUILD_COMMAND ${CMAKE_COMMAND} --build ./ --target install
+    INSTALL_COMMAND ""
+   )
+
+set(CATKIN_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+find_program (CATKIN_TOOLS_AVAILABLE NAMES catkin)
+message(STATUS "CATKIN_TOOLS_AVAILABLE: ${CATKIN_TOOLS_AVAILABLE}")
+message(STATUS "CATKIN_INSTALL_PREFIX: ${CATKIN_INSTALL_PREFIX}")
+
+ExternalProject_Get_Property(pangolin_EXTERNAL BINARY_DIR)
+message(STATUS "binary_dir: ${BINARY_DIR}")
+
+# check if we install the catkin package
+set(CATKIN_INSTALL "False")
+if (DEFINED CATKIN_TOOLS_AVAILABLE)
+  message(STATUS "catkin is available (${CATKIN_TOOLS_AVAILABLE})")
+  exec_program("catkin config  | grep 'Install Packages:' | tr -s ' ' | cut -c19-"
+     OUTPUT_VARIABLE CATKIN_INSTALL
+     )
+else()
+  message(AUTHOR_WARNING "catkin tools not installed; add another approach to check for enabled install;")
+endif()
+message(STATUS "CATKIN_INSTALL: ${CATKIN_INSTALL}")
+
+if (${CATKIN_INSTALL} STREQUAL "True")
+  message(STATUS "Package marked for installation.")
+  ExternalProject_Add_Step(pangolin_EXTERNAL 
+    catkin_install
+    DEPENDEES build
+    COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX:PATH=${CATKIN_INSTALL_PREFIX} ${BINARY_DIR} && ${CMAKE_COMMAND} --build ${BINARY_DIR} --target install
+    COMMENT "Installing the external project..."
+    )
+else ()
+  message(STATUS "Package not installed.")
+endif()
 
 cs_add_library(${PROJECT_NAME} src/empty.cpp)
 add_dependencies(${PROJECT_NAME} pangolin_EXTERNAL)
