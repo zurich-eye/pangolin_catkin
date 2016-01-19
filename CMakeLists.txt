@@ -60,14 +60,7 @@ ExternalProject_Add(pangolin_EXTERNAL
     INSTALL_COMMAND ""
    )
 
-set(CATKIN_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
-find_program (CATKIN_TOOLS_AVAILABLE NAMES catkin)
-message(STATUS "CATKIN_TOOLS_AVAILABLE: ${CATKIN_TOOLS_AVAILABLE}")
-message(STATUS "CATKIN_INSTALL_PREFIX: ${CATKIN_INSTALL_PREFIX}")
-
-#find_package(cmake_external_project_catkin REQUIRED)
-ExternalProject_Catkin(pangolin_EXTERNAL)
-
+ExternalProject_CatkinInstall(pangolin_EXTERNAL)
 
 cs_add_library(${PROJECT_NAME} src/empty.cpp)
 add_dependencies(${PROJECT_NAME} pangolin_EXTERNAL)
