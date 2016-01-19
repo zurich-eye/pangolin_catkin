@@ -75,9 +75,9 @@ if (DEFINED CATKIN_TOOLS_AVAILABLE)
   exec_program("catkin config  | grep 'Install Packages:' | tr -s ' ' | cut -c19-"
      OUTPUT_VARIABLE CATKIN_INSTALL
      )
-else()
+else ()
   message(AUTHOR_WARNING "catkin tools not installed; add another approach to check for enabled install;")
-endif()
+endif ()
 message(STATUS "CATKIN_INSTALL: ${CATKIN_INSTALL}")
 
 if (${CATKIN_INSTALL} STREQUAL "True")
@@ -90,16 +90,16 @@ if (${CATKIN_INSTALL} STREQUAL "True")
     )
 else ()
   message(STATUS "Package not installed.")
-endif()
+endif ()
 
 cs_add_library(${PROJECT_NAME} src/empty.cpp)
 add_dependencies(${PROJECT_NAME} pangolin_EXTERNAL)
 
-if(EXISTS "${CATKIN_DEVEL_PREFIX}/lib/libpangolin${CMAKE_SHARED_LIBRARY_SUFFIX}")
+if (EXISTS "${CATKIN_DEVEL_PREFIX}/lib/libpangolin${CMAKE_SHARED_LIBRARY_SUFFIX}")
   SET(PANGOLIN_FOUND TRUE)
-else()
+else ()
   SET(PANGOLIN_FOUND FALSE)
-endif()
+endif ()
 
 cs_install()
 cs_export(INCLUDE_DIRS ${CATKIN_DEVEL_PREFIX}/include
