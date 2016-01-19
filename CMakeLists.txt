@@ -58,7 +58,7 @@ ExternalProject_Add(pangolin_EXTERNAL
     -DCPP11_NO_BOOST:BOOL=ON
     BUILD_COMMAND ${CMAKE_COMMAND} --build ./ --target install
     INSTALL_COMMAND ""
-   )
+)
 
 ExternalProject_CatkinInstall(pangolin_EXTERNAL)
 
