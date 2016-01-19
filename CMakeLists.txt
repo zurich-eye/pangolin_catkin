@@ -65,32 +65,9 @@ find_program (CATKIN_TOOLS_AVAILABLE NAMES catkin)
 message(STATUS "CATKIN_TOOLS_AVAILABLE: ${CATKIN_TOOLS_AVAILABLE}")
 message(STATUS "CATKIN_INSTALL_PREFIX: ${CATKIN_INSTALL_PREFIX}")
 
-ExternalProject_Get_Property(pangolin_EXTERNAL BINARY_DIR)
-message(STATUS "binary_dir: ${BINARY_DIR}")
+#find_package(cmake_external_project_catkin REQUIRED)
+ExternalProject_Catkin(pangolin_EXTERNAL)
 
-# check if we install the catkin package
-set(CATKIN_INSTALL "False")
-if (DEFINED CATKIN_TOOLS_AVAILABLE)
-  message(STATUS "catkin is available (${CATKIN_TOOLS_AVAILABLE})")
-  exec_program("catkin config  | grep 'Install Packages:' | tr -s ' ' | cut -c19-"
-     OUTPUT_VARIABLE CATKIN_INSTALL
-     )
-else ()
-  message(AUTHOR_WARNING "catkin tools not installed; add another approach to check for enabled install;")
-endif ()
-message(STATUS "CATKIN_INSTALL: ${CATKIN_INSTALL}")
-
-if (${CATKIN_INSTALL} STREQUAL "True")
-  message(STATUS "Package marked for installation.")
-  ExternalProject_Add_Step(pangolin_EXTERNAL 
-    catkin_install
-    DEPENDEES build
-    COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX:PATH=${CATKIN_INSTALL_PREFIX} ${BINARY_DIR} && ${CMAKE_COMMAND} --build ${BINARY_DIR} --target install
-    COMMENT "Installing the external project..."
-    )
-else ()
-  message(STATUS "Package not installed.")
-endif ()
 
 cs_add_library(${PROJECT_NAME} src/empty.cpp)
 add_dependencies(${PROJECT_NAME} pangolin_EXTERNAL)
