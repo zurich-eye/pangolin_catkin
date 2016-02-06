@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(pangolin_catkin)
 
 find_package(catkin_simple REQUIRED)
-catkin_simple()
+catkin_simple(ALL_DEPS_REQUIRED)
 
 include(ExternalProject)
 
@@ -47,28 +47,29 @@ if (CMAKE_BUILD_TYPE)
 endif()
 
 file(MAKE_DIRECTORY ${CATKIN_DEVEL_PREFIX}/include)
-set(CATKIN_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
-
 ExternalProject_Add(pangolin_EXTERNAL
   GIT_REPOSITORY https://github.com/stevenlovegrove/Pangolin
   UPDATE_COMMAND ""
-  CMAKE_ARGS 
+  CMAKE_ARGS
+    -DCMAKE_INSTALL_PREFIX:PATH=${CATKIN_DEVEL_PREFIX}
     -DBUILD_SHARED_LIBS:BOOL=ON
     ${PANGOLIN_CMAKE_OPTIONS}
     -DBUILD_EXAMPLES:BOOL=OFF
     -DCPP11_NO_BOOST:BOOL=ON
-  BUILD_COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX:PATH=${CATKIN_DEVEL_PREFIX} . && make install -j 8
-  INSTALL_COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX:PATH=${CATKIN_INSTALL_PREFIX} . && make install -j 8
+  BUILD_COMMAND ${CMAKE_COMMAND} --build ./ --target install
+  INSTALL_COMMAND ""
 )
+
+ExternalProject_CatkinInstall(pangolin_EXTERNAL)
 
 cs_add_library(${PROJECT_NAME} src/empty.cpp)
 add_dependencies(${PROJECT_NAME} pangolin_EXTERNAL)
 
-if(EXISTS "${CATKIN_DEVEL_PREFIX}/lib/libpangolin${CMAKE_SHARED_LIBRARY_SUFFIX}")
+if (EXISTS "${CATKIN_DEVEL_PREFIX}/lib/libpangolin${CMAKE_SHARED_LIBRARY_SUFFIX}")
   SET(PANGOLIN_FOUND TRUE)
-else()
+else ()
   SET(PANGOLIN_FOUND FALSE)
-endif()
+endif ()
 
 cs_install()
 cs_export(INCLUDE_DIRS ${CATKIN_DEVEL_PREFIX}/include
